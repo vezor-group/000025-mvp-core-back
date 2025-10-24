@@ -1,5 +1,5 @@
 from .account import Account
-from .users import User
+from .auth import User
 from .plan import Plan, BillingCycle
 from .subscription import Subscription, ScheduledChange, Cancellation
 from .usage import Usage
