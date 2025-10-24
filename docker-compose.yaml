@@ -14,15 +14,21 @@ services:
       - DB_MONGO_URL=mongodb://${DB_MONGO_USER}:${DB_MONGO_PASSWORD}@mongo:${DB_MONGO_PORT}/${DB_MONGO_DATABASE}
       - DB_REDIS_HOST=redis
       - DB_REDIS_URL=redis://redis:${DB_REDIS_PORT}/${DB_REDIS_DATABASE}
+      - PYTHONPATH=/app
+      - PYTHONUNBUFFERED=1
     depends_on:
       - postgres
       - mongo
       - redis
     volumes:
+      - .:/app
+      - /app/__pycache__
+      - /app/.pytest_cache
       - vzr-lbs-v0-mvp-base-back-api-logs:/app/logs
     networks:
       - vzr-lbs-v0-mvp-base-back-network
     restart: unless-stopped
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
   # PostgreSQL Database
   postgres:

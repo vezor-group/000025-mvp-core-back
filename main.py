@@ -12,6 +12,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import uvicorn
 
+# Importar rotas de autenticação
+from app.interface.auth.auth_controller import auth_router
+
 # Configuração de logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -33,6 +36,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Incluir rotas de autenticação
+app.include_router(auth_router)
 
 # Variáveis de ambiente
 PROJECT_NAME = os.getenv("PROJECT_NAME", "VZR-LBS-v0-mvp-base-back")
@@ -134,6 +140,19 @@ async def get_ofertas():
             "ofertas_ativas": 0,
             "ofertas_pendentes": 0,
             "ofertas_finalizadas": 0
+        },
+        "timestamp": datetime.now().isoformat()
+    }
+
+# Endpoint protegido de exemplo
+@app.get("/protected")
+async def protected_endpoint():
+    """Endpoint protegido que requer autenticação"""
+    return {
+        "message": "Este é um endpoint protegido",
+        "data": {
+            "access_level": "authenticated",
+            "description": "Este endpoint só pode ser acessado com token válido"
         },
         "timestamp": datetime.now().isoformat()
     }
