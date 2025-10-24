@@ -1,0 +1,26 @@
+# API Framework
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+
+# Dependências para bancos de dados
+# PostgreSQL
+sqlalchemy>=2.0.0
+asyncpg>=0.28.0
+psycopg2-binary>=2.9.0
+
+# MongoDB
+motor>=3.0.0
+pymongo>=4.0.0
+
+# Redis
+redis>=4.5.0
+
+# Configuração
+pydantic>=2.0.0
+python-dotenv>=1.0.0
+
+# Logging
+structlog>=23.0.0
+
+# Utilitários
+requests>=2.31.0

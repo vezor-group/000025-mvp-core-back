@@ -1,0 +1,113 @@
+services:
+  # API Service
+  api:
+    build: .
+    container_name: ${PROJECT_NAME}-api
+    ports:
+      - "${API_PORT:-8000}:8000"
+    env_file:
+      - .env
+    environment:
+      - DB_POSTGRES_HOST=postgres
+      - DB_POSTGRES_URL=postgresql://${DB_POSTGRES_USER}:${DB_POSTGRES_PASSWORD}@postgres:${DB_POSTGRES_PORT}/${DB_POSTGRES_DATABASE}
+      - DB_MONGO_HOST=mongo
+      - DB_MONGO_URL=mongodb://${DB_MONGO_USER}:${DB_MONGO_PASSWORD}@mongo:${DB_MONGO_PORT}/${DB_MONGO_DATABASE}
+      - DB_REDIS_HOST=redis
+      - DB_REDIS_URL=redis://redis:${DB_REDIS_PORT}/${DB_REDIS_DATABASE}
+    depends_on:
+      - postgres
+      - mongo
+      - redis
+    volumes:
+      - vzr-lbs-v0-mvp-base-back-api-logs:/app/logs
+    networks:
+      - vzr-lbs-v0-mvp-base-back-network
+    restart: unless-stopped
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: ${PROJECT_NAME}-postgres
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_DB=${DB_POSTGRES_DATABASE}
+      - POSTGRES_USER=${DB_POSTGRES_USER}
+      - POSTGRES_PASSWORD=${DB_POSTGRES_PASSWORD}
+    ports:
+      - "${DB_POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - vzr-lbs-v0-mvp-base-back-postgres-data:/var/lib/postgresql/data
+      - vzr-lbs-v0-mvp-base-back-postgres-logs:/var/log/postgresql
+    networks:
+      - vzr-lbs-v0-mvp-base-back-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # MongoDB Database
+  mongo:
+    image: mongo:7.0
+    container_name: ${PROJECT_NAME}-mongo
+    env_file:
+      - .env
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${DB_MONGO_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${DB_MONGO_PASSWORD}
+      - MONGO_INITDB_DATABASE=${DB_MONGO_DATABASE}
+    ports:
+      - "${DB_MONGO_PORT:-27017}:27017"
+    volumes:
+      - vzr-lbs-v0-mvp-base-back-mongo-data:/data/db
+      - vzr-lbs-v0-mvp-base-back-mongo-logs:/var/log/mongodb
+    networks:
+      - vzr-lbs-v0-mvp-base-back-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: ${PROJECT_NAME}-redis
+    env_file:
+      - .env
+    ports:
+      - "${DB_REDIS_PORT:-6379}:6379"
+    volumes:
+      - vzr-lbs-v0-mvp-base-back-redis-data:/data
+      - vzr-lbs-v0-mvp-base-back-redis-logs:/var/log/redis
+    networks:
+      - vzr-lbs-v0-mvp-base-back-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  vzr-lbs-v0-mvp-base-back-postgres-data:
+    driver: local
+  vzr-lbs-v0-mvp-base-back-postgres-logs:
+    driver: local
+  vzr-lbs-v0-mvp-base-back-mongo-data:
+    driver: local
+  vzr-lbs-v0-mvp-base-back-mongo-logs:
+    driver: local
+  vzr-lbs-v0-mvp-base-back-redis-data:
+    driver: local
+  vzr-lbs-v0-mvp-base-back-redis-logs:
+    driver: local
+  vzr-lbs-v0-mvp-base-back-api-logs:
+    driver: local
+
+networks:
+  vzr-lbs-v0-mvp-base-back-network:
+    driver: bridge
