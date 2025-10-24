@@ -104,8 +104,8 @@ class AuthService:
             id=user_id,
             email=email,
             name=name,
-            status=UserStatus.PENDING,
-            email_verified=False
+            status=UserStatus.ACTIVE,  # Para desenvolvimento, criar usuário ativo
+            email_verified=True  # Para desenvolvimento, marcar como verificado
         )
         
         # Se tem senha, criar provedor básico

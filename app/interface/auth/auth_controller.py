@@ -36,7 +36,7 @@ async def signin(request: SignInRequest):
     Endpoint de login
     
     Suporta:
-    - Login básico: providerAuth="basic", email, senhaHash
+    - Login básico: providerAuth="basic", email, password
     - Login Google: providerAuth="google", email
     - Login Microsoft: providerAuth="microsoft", email
     """
@@ -44,10 +44,12 @@ async def signin(request: SignInRequest):
         provider_type = AuthProviderType(request.providerAuth)
         
         if provider_type == AuthProviderType.BASIC:
-            if not request.senhaHash:
+            # Mapear senhaHash para password (compatibilidade com frontend)
+            password = request.password or request.senhaHash
+            if not password:
                 raise HTTPException(status_code=400, detail="Senha é obrigatória para login básico")
             
-            result = await signin_use_case.execute_basic(request.email, request.senhaHash)
+            result = await signin_use_case.execute_basic(request.email, password)
             
         elif provider_type in [AuthProviderType.GOOGLE, AuthProviderType.MICROSOFT]:
             # Para login social, assumimos que o providerId é o email por enquanto

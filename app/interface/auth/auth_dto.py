@@ -7,7 +7,8 @@ class SignInRequest(BaseModel):
     """DTO para requisição de login"""
     providerAuth: str  # "basic", "google", "microsoft"
     email: EmailStr
-    senhaHash: Optional[str] = None  # Apenas para providerAuth="basic"
+    password: Optional[str] = None  # Senha em texto plano para providerAuth="basic"
+    senhaHash: Optional[str] = None  # Campo legado - será mapeado para password
 
 
 class SignUpRequest(BaseModel):
